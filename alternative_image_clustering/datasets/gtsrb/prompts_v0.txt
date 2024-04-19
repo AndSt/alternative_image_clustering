@@ -1,0 +1,24 @@
+[
+    {
+        "labels": ["type"],
+        "prompts": [
+            "Identify the type of traffic sign shown in the image.",
+            "What type of traffic sign is in the picture?",
+            "What kind of traffic sign is visible in the image?",
+            "Which traffic sign is in the picture?",
+            "Describe the specific traffic sign present in the image.",
+            "What is the type of the traffic sign in the picture?"
+        ]
+    },
+    {
+        "labels": ["colour"],
+        "prompts": [
+            "List all the colours present on the traffic sign in the image.",
+            "Describe the primary color of the sign in the picture.",
+            "Specify the main color of the traffic sign in the image.",
+            "What are the primary and the secondary colours of the traffic sign?",
+            "What is the colour of the traffic sign in the image?",
+            "What is the dominant colour of the traffic sign in the picture?"
+        ]
+    }
+]

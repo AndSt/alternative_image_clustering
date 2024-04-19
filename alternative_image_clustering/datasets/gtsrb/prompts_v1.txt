@@ -1,0 +1,26 @@
+[
+    {
+        "labels": ["type"],
+        "prompts": [
+            "What kind of traffic sign is shown in the picture?",
+            "Can you identify the category of the traffic sign displayed in the image?",
+            "What class of traffic sign is depicted in the photo?",
+            "What kind of traffic sign is shown in the picture? Answer concisely.",
+            "Can you identify the category of the traffic sign displayed in the image? Answer concisely.",
+            "What class of traffic sign is depicted in the photo? Answer concisely."
+        ],
+        "source_prompt": "Generate three diverse paraphrases for the following question:\n\nWhat is the type of the traffic sign in the image?"
+    },
+    {
+        "labels": ["colour"],
+        "prompts": [
+            "What color is the traffic sign shown in the picture?",
+            "Can you tell me the color of the traffic sign depicted in the image?",
+            "What hue is the traffic sign in the photograph?",
+            "What color is the traffic sign shown in the picture? Answer concisely.",
+            "Can you tell me the color of the traffic sign depicted in the image? Answer concisely.",
+            "What hue is the traffic sign in the photograph? Answer concisely."
+        ],
+        "source_prompt": "Generate three diverse paraphrases for the following question:\n\nWhat is the colour of the traffic sign in the image?"
+    }
+]

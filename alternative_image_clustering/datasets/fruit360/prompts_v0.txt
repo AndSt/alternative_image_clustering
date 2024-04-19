@@ -1,0 +1,21 @@
+[
+    {
+        "labels": ["type"],
+        "prompts": [
+            "Which food is in the picture?",
+            "Which produce can be seen?",
+            "What type of fruit or vegetable is shown in the picture?",
+            "What kind of fruits or a vegetables are visible in the picture?"
+        ]
+    },
+    {
+        "labels": ["colour"],
+        "prompts": [
+            "What is the colour of the produce in the picture?",
+            "What is the primary color of the produce in the image?",
+            "Describe the primary color of the fruit or vegetable in the picture.",
+            "What is the dominant color of the produce shown in the image?"
+        ]
+    }
+]
+
