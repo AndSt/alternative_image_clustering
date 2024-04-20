@@ -148,7 +148,7 @@ class Result(dict):
 
 class Dataset:
     def __init__(self, dataset_name: str, prompt_version: Optional[str], results: Optional[Result],
-                 prompt_file: Optional[PromptFile]):
+                 prompt_file: Optional[PromptFile], embedding_type: str = "image"):
         if prompt_version is None and (results is None or prompt_file is None):
             raise Exception("prompt_version or results and prompt_file need(s) to be specified")
 
@@ -173,6 +173,10 @@ class Dataset:
 
         self.answers = self.results.extract_answers()
         self.image_paths = self.results.extract_image_paths()
+
+        self.embedding_type = embedding_type
+
+        self.cache_file_name = f"embedding_cache/{self.dataset_name}_{self.prompt_version}_{self.embedding_type}.npy"
 
     @classmethod
     def load_from_disk(cls, dataset_name, prompt_version):
