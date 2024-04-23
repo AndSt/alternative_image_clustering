@@ -13,7 +13,7 @@ from transformers import (
     LlavaNextForConditionalGeneration,
 )
 
-from dataloader import load_prompt_file
+from alternative_image_clustering.data.dataset import load_prompt_file
 
 
 def _get_img_paths(img_dir, sample_size=None):

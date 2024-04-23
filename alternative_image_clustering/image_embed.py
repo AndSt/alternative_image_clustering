@@ -117,7 +117,7 @@ class LLavaImageEmbedder:
                 assert image_idx not in results, "Image index already in results."
                 results[image_idx] = image_features[j]
 
-        file_path = f"{dataset_dir}/{dataset_name}_image_embeddings.pbz2"
+        file_path = f"{dataset_dir}/image_embeddings.pbz2"
 
         joblib.dump(results, file_path)
         
