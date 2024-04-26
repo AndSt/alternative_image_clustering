@@ -1,7 +1,6 @@
 git+https://github.com/huggingface/transformers.git@main
 sentence_transformers
 torch
-open_clip_torch
 accelerate
 bitsandbytes
 scipy
@@ -9,5 +8,7 @@ Pillow
 scikit-learn
 numpy
 matplotlib
-kaggle
 tqdm
+
+ClusterEnsembles
+ClustPy

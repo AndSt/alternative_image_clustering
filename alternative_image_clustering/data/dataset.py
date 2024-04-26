@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Optional
+from typing import Optional, List, Union
 
 import joblib
 import numpy as np
@@ -148,12 +148,12 @@ class Dataset:
 
         return GeneratedTextObj(json_obj)
 
-    def get_n_clusters(self):
-        n_clusters = {
+    def get_n_clusters_per_category(self):
+        n_clusters_per_category = {
             category: len(self.clusters_to_names[category].keys())
             for category in self.get_categories()
         }
-        return n_clusters
+        return n_clusters_per_category
 
     def get_category_ids(self, category):
         subset_ids = []
@@ -161,6 +161,11 @@ class Dataset:
             if entry["category"] == category:
                 subset_ids.append(entry["prompt_id"])
         return subset_ids
+
+    def set_indices(self, indices: Union[int, List[int]]):
+        if isinstance(indices, int):
+            indices = [indices]
+        self.active_prompt_indices = indices
 
     def set_category(self, category):
         self.active_prompt_indices = self.get_category_ids(category)
@@ -173,6 +178,15 @@ class Dataset:
             clustering = json.load(filein)
 
         return [clustering[img_name] for img_name in self.img_names]
+
+    def get_full_clustering_labels(self):
+        full_labels = []
+        for category in self.get_categories():
+            full_labels.append(self.get_clustering_labels(category))
+        full_labels = np.array(full_labels).T
+        assert full_labels.shape == (len(self.img_names), len(self.get_categories()))
+
+        return full_labels
 
     def get_embeddings(self, sbert_model=None):
         # return np.load(self.cache_file_name)
@@ -200,7 +214,12 @@ class Dataset:
         file_name = os.path.join(cache_dir, file_name)
 
         if os.path.exists(file_name):
-            return joblib.load(file_name)
+            embedding_file = joblib.load(file_name)
+            if DEBUG:
+                embedding = embedding_file[:400]
+            if self.embedding_type == "tfidf":
+                return embedding_file.toarray()
+            return embedding_file
 
         if self.embedding_type == "tfidf":  # always concatenated text
             texts = []
@@ -216,9 +235,9 @@ class Dataset:
             joblib.dump(embeddings, file_name)
 
             if DEBUG:
-                return embeddings[:400]
+                embeddings = embeddings[:400]
 
-            return embeddings
+            return embeddings.toarray()
         # load textual concatenation of a subset of the prompts
         elif self.embedding_type == "sbert_concat":
             texts = []

@@ -24,25 +24,25 @@ def get_metrics(labels_true, labels_pred):
     return metrics
 
 
-def get_best_assignment_metrics(matrix, categories):
-    all_permutations = list(permutations(range(len(categories)), len(categories)))
+# def get_best_assignment_metrics(matrix, categories):
+#     all_permutations = list(permutations(range(len(categories)), len(categories)))
 
-    scores = {}
-    for permutation in all_permutations:
-        score = 0
-        for i in range(3):
-            score += matrix[permutation[i], i]
-        scores[permutation] = score
+#     scores = {}
+#     for permutation in all_permutations:
+#         score = 0
+#         for i in range(3):
+#             score += matrix[permutation[i], i]
+#         scores[permutation] = score
 
-    best_permutation = max(scores, key=scores.get)
+#     best_permutation = max(scores, key=scores.get)
 
-    return {
-        category: matrix[best_permutation[idx], idx]
-        for idx, category in enumerate(categories)
-    }
+#     return {
+#         category: matrix[best_permutation[idx], idx]
+#         for idx, category in enumerate(categories)
+#     }
 
 
-def get_multiple_labeling_metrics(label_true, labels_pred, categories):
+def get_multiple_labeling_metrics(labels_true, labels_pred, categories):
 
     metric_name_func = {
         "AMI": adjusted_mutual_info_score,
@@ -55,10 +55,11 @@ def get_multiple_labeling_metrics(label_true, labels_pred, categories):
 
     for metric_name, metric_func in metric_name_func.items():
         matrix = MultipleLabelingsConfusionMatrix(
-            labels_true=label_true, labels_pred=labels_pred, metric=metric_func
-        ).rearrange_matrix()
-        metric_values = get_best_assignment_metrics(matrix.confusion_matrix, categories)
-        for category in categories:
-            metrics[category][metric_name] = metric_values[category]
+            labels_true=labels_true, labels_pred=labels_pred, metric=metric_func
+        )
+        metric_values = matrix.rearrange().diagonal()
+
+        for idx, category in enumerate(categories):
+            metrics[category][metric_name] = metric_values[idx]
 
     return metrics

@@ -1,16 +1,15 @@
+import multiprocessing
 import ClusterEnsembles as CE
 import numpy as np
 import random
 
 from typing import List, Dict
 
-# warnings.simplefilter(action="ignore", category=FutureWarning)
-
 from prometheus_client import Info
 from sklearn.cluster import KMeans
 from clustpy.alternative import NrKmeans
+from tqdm import tqdm
 
-# from sklearn.preprocessing import StandardScaler
 from alternative_image_clustering.metrics import (
     get_metrics,
     get_multiple_labeling_metrics,
@@ -19,14 +18,22 @@ from alternative_image_clustering.metrics import (
 RANDOM_STATE = 812
 
 
-# def get_clustering_method(name: str):
-#     methods = {"kmeans": kmeans, "xmeans": xmeans, "gmeans": gmeans}
-#     assert name in methods, "Clustering method not found."
-#     return methods[name]
+def run_single_kmeans(data: np.ndarray, n_clusters: int, random_state: int):
 
+    parameters = {
+        "n_clusters": n_clusters,
+        "init": "k-means++",
+        "n_init": 1,
+        "random_state": random_state,
+    }
+    model = KMeans(**parameters)
+    clustering = model.fit(data)
 
-def comp_avg(lst):
-    return sum(lst) / len(lst)
+    return {
+        "labels": clustering.labels_,
+        "inertia": model.inertia_,
+        "random_state": random_state,
+    }
 
 
 def kmeans(data: np.ndarray, labels: np.ndarray, n_clusters: int, num_runs=10):
@@ -56,25 +63,17 @@ def kmeans(data: np.ndarray, labels: np.ndarray, n_clusters: int, num_runs=10):
 
     runs = []
     for random_state in random_states:
-        parameters = {
-            "n_clusters": n_clusters,
-            "init": "k-means++",
-            "n_init": 1,
-            "random_state": random_state,
-        }
-        model = KMeans(**parameters)
-        clustering = model.fit(data)
 
-        runs.append(
-            {
-                "labels": clustering.labels_,
-                "inertia": model.inertia_,
-                "metrics": get_metrics(
-                    labels_true=labels, labels_pred=clustering.labels_
-                ),
-                "random_state": random_state,
-            }
+        run = run_single_kmeans(
+            data=data, n_clusters=n_clusters, random_state=random_state
         )
+        if labels is not None:
+            metrics = get_metrics(labels_true=labels, labels_pred=run["labels"])
+        else:
+            metrics = None
+
+        run["metrics"] = metrics
+        runs.append(run)
 
     best_run = min(runs, key=lambda x: x["inertia"])
     info = {
@@ -82,20 +81,50 @@ def kmeans(data: np.ndarray, labels: np.ndarray, n_clusters: int, num_runs=10):
         "best_labels": best_run["labels"],
         "best_random_state": best_run["random_state"],
     }
-
-    info["metrics"] = {
-        metric: comp_avg([run["metrics"][metric] for run in runs])
-        for metric in runs[0]["metrics"]
-    }
+    if labels is not None:
+        info["metrics"] = {
+            metric: np.mean([run["metrics"][metric] for run in runs])
+            for metric in runs[0]["metrics"]
+        }
+        info["metrics_stddev"] = {
+            metric: np.std([run["metrics"][metric] for run in runs])
+            for metric in runs[0]["metrics"]
+        }
 
     # if cached_results is None:
     #     _save_to_disk(data, cache_name, clustering.labels_)
     return info
 
 
+def run_single_nr_kmeans(data, labels, n_clusters, random_state):
+    """Function to be executed by each worker process."""
+
+    categories = list(n_clusters.keys())
+
+    parameters = {
+        "n_clusters": list(n_clusters.values()),
+        "max_iter": 300,
+        "random_state": random_state,
+        "debug": True,
+    }
+    model = NrKmeans(**parameters).fit(data)
+    pred_clusterings = model.labels_
+
+    return {
+        "labels": pred_clusterings,
+        "cost": model.calculate_cost_function(),
+        "metrics": get_multiple_labeling_metrics(
+            labels_true=labels,
+            labels_pred=pred_clusterings,
+            categories=categories,
+        ),
+        "random_state": random_state,
+    }
+
+
 def nrkmeans(
     data: np.ndarray,
-    labels: Dict[str, np.ndarray],
+    labels: np.ndarray,
     n_clusters: Dict[str, int],
     num_runs=10,
 ):
@@ -103,40 +132,33 @@ def nrkmeans(
     random.seed(RANDOM_STATE)
     random_states = random.sample(range(1000), num_runs)
 
-    categories = list(labels.keys())
+    categories = list(n_clusters.keys())
+    parameters = [
+        (data, labels, n_clusters, random_state) for random_state in random_states
+    ]
 
-    runs = []
-    for random_state in random_states:
-        parameters = {
-            "n_clusters": list(n_clusters.values()),
-            "max_iter": 300,
-            "random_state": random_state,
-        }
-        model = NrKmeans(**parameters).fit(data)
-        pred_clusterings = model.labels_
-
-        runs.append(
-            {
-                "labels": pred_clusterings,
-                "cost": model.calculate_cost_function(),
-                "metrics": get_multiple_labeling_metrics(
-                    label_true=labels,
-                    labels_pred=pred_clusterings,
-                    categories=categories,
-                ),
-                "random_state": random_state,
-            }
+    # Multiprocessing with a Pool of workers
+    with multiprocessing.Pool() as pool:
+        runs = list(
+            tqdm(pool.starmap(run_single_nr_kmeans, parameters), total=num_runs)
         )
-    
+
     best_run = min(runs, key=lambda x: x["cost"])
     info = {
         "best_cost": best_run["cost"],
         "best_labels": best_run["labels"],
         "best_random_state": best_run["random_state"],
     }
-    info["metrics"] = { 
+    info["metrics"] = {
         category: {
-            metric: comp_avg([run["metrics"][category][metric] for run in runs])
+            metric: np.mean([run["metrics"][category][metric] for run in runs])
+            for metric in runs[0]["metrics"][category]
+        }
+        for category in categories
+    }
+    info["metrics_stddev"] = {
+        category: {
+            metric: np.std([run["metrics"][category][metric] for run in runs])
             for metric in runs[0]["metrics"][category]
         }
         for category in categories
