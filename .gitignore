@@ -162,3 +162,5 @@ cython_debug/
 **/images/**
 
 datasets/
+embedding_cache
+benchmark_cache

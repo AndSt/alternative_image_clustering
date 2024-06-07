@@ -63,7 +63,7 @@ def load_prompt_file(path):
         return None
 
     prompt_dict = {}
-
+    print(path)
     with open(path, "r") as filein:
         prompt_file = json.load(filein)
     i = 0

@@ -1,4 +1,5 @@
 import os
+from sre_parse import CATEGORIES
 import joblib
 
 from typing import List
@@ -12,23 +13,28 @@ def create_kmeans_row(
     metrics: List[str] = ["ACC", "AMI"],
     file_name: str = "kmeans",
 ):
-    row = [embedding_type, file_name]
+    row = [
+        embedding_type.replace("sbert_concat", "SBERT").replace("tfidf", "TF-IDF"),
+        file_name.replace("_", "-").replace("per-category-kmeans", "Concatenate"),
+    ]
     for dataset in datasets:
         dset: Dataset = Dataset(
             dataset_name=dataset, base_dir=base_dir, embedding_type=embedding_type
         )
         categories = dset.get_categories()
-
+        if embedding_type == "image":
+            load_dir = "benchmark_cache_old"
+        else:
+            load_dir = "benchmark_cache_old"
         results = joblib.load(
             os.path.join(
                 base_dir,
-                "benchmark_cache",
+                load_dir, #  here old???
                 dataset,
                 embedding_type,
                 f"{file_name}.pbz2",
             )
         )
-        # print(results)
         for category in categories:
             for metric in metrics:
                 row.append(results[category]["metrics"][metric])
@@ -43,7 +49,7 @@ def create_nr_baseline_row(
     datasets: List[str],
     metrics=["ACC", "AMI"],
 ):
-    row = [embedding_type, baseline]
+    row = [embedding_type.replace("sbert_concat", "SBERT").replace("tfidf", "TF-IDF"), baseline.replace("_", "-").replace("nrkmeans", "NR-kmeans")]
     for dataset in datasets:
         dset: Dataset = Dataset(
             dataset_name=dataset, base_dir=base_dir, embedding_type=embedding_type
@@ -52,7 +58,11 @@ def create_nr_baseline_row(
 
         results = joblib.load(
             os.path.join(
-                base_dir, "benchmark_cache", dataset, embedding_type, f"{baseline}.pbz2"
+                base_dir,
+                "benchmark_cache_old",
+                dataset,
+                embedding_type,
+                f"{baseline}.pbz2",
             )
         )
         for category in categories:
@@ -65,8 +75,8 @@ def create_nr_baseline_row(
 def create_per_prompt_rows(
     base_dir: str, embedding_type: str, datasets: List[str], metrics=["ACC", "AMI"]
 ):
-    row_avg = [embedding_type, "per_prompt"]
-    row_max = [embedding_type, "per_prompt_max"]
+    row_avg = [embedding_type.replace("sbert_concat", "SBERT").replace("tfidf", "TF-IDF"), "Avg. Prompt"]
+    row_max = [embedding_type.replace("sbert_concat", "SBERT").replace("tfidf", "TF-IDF"), "Max. Prompt"]
     for dataset in datasets:
         dset: Dataset = Dataset(
             dataset_name=dataset, base_dir=base_dir, embedding_type=embedding_type
@@ -76,7 +86,7 @@ def create_per_prompt_rows(
         results = joblib.load(
             os.path.join(
                 base_dir,
-                "benchmark_cache",
+                "benchmark_cache_old",
                 dataset,
                 embedding_type,
                 "per_prompt_kmeans.pbz2",
@@ -92,10 +102,11 @@ def create_per_prompt_rows(
                     results["per_category_max_performance"][category][metric]
                 )
 
-    return [row_avg, row_max]
+    return [row_avg]#, row_max]
 
 
 def create_table_head(base_dir: str, datasets: List[str], metrics: List[str]):
+
     header = [("", "", ""), ("", "", "")]
     for dataset in datasets:
         dset: Dataset = Dataset(

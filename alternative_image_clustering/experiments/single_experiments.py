@@ -1,10 +1,14 @@
-import re
-from sklearn import metrics
 import numpy as np
 import copy
 
+import os
+
 from alternative_image_clustering.data.dataset import Dataset
-from alternative_image_clustering.clustering import kmeans, nrkmeans
+from alternative_image_clustering.clustering import kmeans
+from alternative_image_clustering.baselines.nrkmeans import nrkmeans
+from alternative_image_clustering.baselines.enrc import enrc
+from alternative_image_clustering.baselines.orth_run import orth
+
 
 
 def run_full_kmeans(dataset: str, embedding_type: str, base_dir: str):
@@ -95,6 +99,7 @@ def run_per_prompt_kmeans(dataset: str, embedding_type: str, base_dir: str):
             results["per_category_max_performance"][category][metric] = results["per_category_max_performance"][category][metric][max_id]
             results["per_category_max_performance_stddev"][category][metric] = results["per_category_max_performance_stddev"][category][metric][max_id]
 
+    results["per_prompt_performance"] = per_prompt_performance
     return results
 
 
@@ -140,4 +145,63 @@ def run_nr_kmeans_clusterings(dataset: str, embedding_type: str, base_dir: str):
     )
     
     return nrkmeans_results
+
+def run_enrc_clusterings(dataset: str, embedding_type: str, base_dir: str):
+
+    # load data
+    dataset: Dataset = Dataset(
+        base_dir=base_dir,
+        dataset_name=dataset,
+        embedding_type=embedding_type,
+    )
+
+    save_dir = os.path.join(base_dir, "embedding_cache", embedding_type)
+
+    # run nrkmeans
+    nrkmeans_results = enrc(
+        data=dataset.get_embeddings(),
+        labels=dataset.get_full_clustering_labels(),
+        n_clusters=dataset.get_n_clusters_per_category(),
+        save_dir=save_dir
+    )
+    
+    return nrkmeans_results
+
+def run_orth1_clusterings(dataset: str, embedding_type: str, base_dir: str):
+
+    # load data
+    dataset: Dataset = Dataset(
+        base_dir=base_dir,
+        dataset_name=dataset,
+        embedding_type=embedding_type,
+    )
+
+    # run nrkmeans
+    orth_results = orth(
+        data=dataset.get_embeddings(),
+        labels=dataset.get_full_clustering_labels(),
+        n_clusters=dataset.get_n_clusters_per_category(),
+        orth_type="orth_1"
+    )
+    
+    return orth_results
+
+def run_orth2_clusterings(dataset: str, embedding_type: str, base_dir: str):
+
+    # load data
+    dataset: Dataset = Dataset(
+        base_dir=base_dir,
+        dataset_name=dataset,
+        embedding_type=embedding_type,
+    )
+
+    # run nrkmeans
+    orth_results = orth(
+        data=dataset.get_embeddings(),
+        labels=dataset.get_full_clustering_labels(),
+        n_clusters=dataset.get_n_clusters_per_category(),
+        orth_type="orth_2"
+    )
+    
+    return orth_results
 
