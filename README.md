@@ -23,6 +23,7 @@ You can install them via the instructions in the respective Github reporities.
 
 ## Data
 
+You can find the data on [Google Drive](https://drive.google.com/drive/folders/1wODNrg1WO6Rx6R5UnxaGlSt3szwfYkLC?usp=drive_link).
 Untar the datasets.tar.gz file and save it under a folder named ```datasets/```. Now you are ready to run experiments, given the already captioned data. If you want to use your own data, you need to run text-to-image models and image embedding.
 
 ### Image-to-Text
