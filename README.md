@@ -4,34 +4,10 @@ Authors: Andreas Stephan, Lukas Miklautz, Collin Leiber, Pedro Henrique Luz de A
 
 This repo contains the code related to the paper "Alternative Text-Guided Image clustering". If there's questions, please contact us at [andreas.stephan@univie.ac.at](mailto:andreas.stephan@univie.ac.at).
 
-![Overview of the Methodology](docs/methodology_overview.png)
 
 ## Abstract
 
-Traditional image clustering techniques only
-find a single grouping within visual data. In
-particular, they do not provide a possibility to
-explicitly define multiple types of clustering.
-This work explores the potential of large vision-
-language models to facilitate alternative image
-clustering. We propose Text-Guided Alterna-
-tive Image Consensus Clustering (TGAICC),
-a novel approach that leverages user-specified
-interests via prompts to guide the discovery of
-diverse clusterings. To achieve this, it generates
-a clustering for each prompt, groups them us-
-ing hierarchical clustering, and then aggregates
-them using consensus clustering. TGAICC out-
-performs image- and text-based baselines on
-four alternative image clustering benchmark
-datasets. Furthermore, using count-based word
-statistics, we are able to obtain text-based expla-
-nations of the alternative clusterings. In conclu-
-sion, our research illustrates how contemporary
-large vision-language models can transform ex-
-planatory data analysis, enabling the generation
-of insightful, customizable, and diverse image
-clusterings.
+Traditional image clustering techniques only find a single grouping within visual data. In particular, they do not provide a possibility to explicitly define multiple types of clustering. This work explores the potential of large vision-language models to facilitate alternative image clustering. We propose Text-Guided Alternative Image Consensus Clustering (TGAICC), a novel approach that leverages user-specified interests via prompts to guide the discovery of diverse clusterings. To achieve this, it generates a clustering for each prompt, groups them using hierarchical clustering, and then aggregates them using consensus clustering. TGAICC outperforms image- and text-based baselines on four alternative image clustering benchmark datasets. Furthermore, using count-based word statistics, we are able to obtain text-based explanations of the alternative clusterings. In conclusion, our research illustrates how contemporary large vision-language models can transform explanatory data analysis, enabling the generation of insightful, customizable, and diverse image clusterings.
 
 ## Installation
 
@@ -83,3 +59,33 @@ PYTHONPATH=. python alternative_image_clustering/experiments/full_baselines_run.
 You can find an overview over all of them in Table 2 of the paper.
 
 ## Citation
+
+```
+@inproceedings{stephan-etal-2024-text-guided,
+    title = "Text-Guided Alternative Image Clustering",
+    author = "Stephan, Andreas  and
+      Miklautz, Lukas  and
+      Leiber, Collin  and
+      Luz De Araujo, Pedro Henrique  and
+      R{\'e}p{\'a}s, Dominik  and
+      Plant, Claudia  and
+      Roth, Benjamin",
+    editor = "Zhao, Chen  and
+      Mosbach, Marius  and
+      Atanasova, Pepa  and
+      Goldfarb-Tarrent, Seraphina  and
+      Hase, Peter  and
+      Hosseini, Arian  and
+      Elbayad, Maha  and
+      Pezzelle, Sandro  and
+      Mozes, Maximilian",
+    booktitle = "Proceedings of the 9th Workshop on Representation Learning for NLP (RepL4NLP-2024)",
+    month = aug,
+    year = "2024",
+    address = "Bangkok, Thailand",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2024.repl4nlp-1.13/",
+    pages = "177--190",
+    abstract = "Traditional image clustering techniques only find a single grouping within visual data. In particular, they do not provide a possibility to explicitly define multiple types of clustering. This work explores the potential of large vision-language models to facilitate alternative image clustering. We propose Text-Guided Alternative Image Consensus Clustering (TGAICC), a novel approach that leverages user-specified interests via prompts to guide the discovery of diverse clusterings. To achieve this, it generates a clustering for each prompt, groups them using hierarchical clustering, and then aggregates them using consensus clustering. TGAICC outperforms image- and text-based baselines on four alternative image clustering benchmark datasets. Furthermore, using count-based word statistics, we are able to obtain text-based explanations of the alternative clusterings. In conclusion, our research illustrates how contemporary large vision-language models can transform explanatory data analysis, enabling the generation of insightful, customizable, and diverse image clusterings."
+}
+```
